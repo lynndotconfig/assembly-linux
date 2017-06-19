@@ -8,6 +8,7 @@
 #	%al  - 当前字符
 # 	%edx - 当前字符地址
 
+.code32
 .type count_chars, @function
 .globl count_chars
 

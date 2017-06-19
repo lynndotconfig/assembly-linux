@@ -1,4 +1,4 @@
-.include "record-def,s"
+.include "record-def.s"
 .include "linux.s"
 
 # 目的： 此函数从文件描述符读取一条记录
