@@ -20,7 +20,7 @@ output_file_name:
 _start:
   # 复制栈指针并为局部变量分配空间
   movl %esp, %ebp
-  subl $8, %esp
+  subl $8, %ebp
 
   # 打开用于读到文件
   movl $SYS_OPEN, %eax
@@ -42,7 +42,7 @@ _start:
   movl %eax, ST_OUTPUT_DESCRIPTOR(%ebp)
 
 loop_begin:
-  pushl ST_INPUT_DESCRIPTOR
+  pushl ST_INPUT_DESCRIPTOR(%ebp)
   pushl $record_buffer
   call read_record
   addl $8, %esp
