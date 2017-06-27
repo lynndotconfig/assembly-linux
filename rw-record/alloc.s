@@ -1,6 +1,6 @@
-# 用于管理内存使用到程序－－－按需分配和释放内存
+# 用于管理内存使用的程序－－－按需分配和释放内存
 # 注意：
-#	使用这些例程到程序要求一定大小到内存．在实际操作中，我们使用到内存更大，但在回转指针前将之放在开始处．
+#	使用这些例程的程序要求一定大小到内存．在实际操作中，我们使用到内存更大，但在回转指针前将之放在开始处．
 # 	我们增加一个大小字段，以及一个AVAILABLE/UNAVAILABLE标记，　因此内存看起来如下所示
 #   ##################################################
 #   #AVAILABLE标记＃内存大小＃实际内存位置＃
@@ -16,7 +16,7 @@
 heap_begin:
  .long 0
 
-# 此处指向我们管理到内存之后到一个内存位置
+# 此处指向我们管理到内存之后的一个内存位置
 current_break:
  .long 0
 
@@ -29,8 +29,8 @@ current_break:
 .equ HDR_SIZE_OFFSET, 4
 
 ######## 常量 ################
-.equ UNAVAILABLE, 0  # 这是用于标记以分配空间到数字
-.equ AVAILABLE, 1  # 这是用于标记已回收空间到数字， 此类空间可用于再分配
+.equ UNAVAILABLE, 0  # 这是用于标记以分配空间的数字
+.equ AVAILABLE, 1  # 这是用于标记已回收空间的数字， 此类空间可用于再分配
 .equ SYS_BRK, 45  # 用于中断系统调用到系统调用号
 
 .equ LINUX_SYSCALL, 0x80  # 使系统调用号更易读
@@ -40,14 +40,14 @@ current_break:
 ######## 函数 ################
 
 ## allocate_init ##
-# 目的： 调用此函数来初始化函数（更具体到说，此函数设置heap_begin和current_break)。此函数无参数和返回值)
+# 目的： 调用此函数来初始化函数（更具体到说，此函数设置heap_begin和current_break)。此函数无参数和返回值。
 .globl allocate_init
 .type allocate_init, @function
 allocate_init:
   pushl %ebp
   pushl %esp, %ebp
 
-  # 如果发起brk系统调用时， %ebx内容为零，该系统调用返回最后一个有效可用到地址
+  # 如果发起brk系统调用时， %ebx内容为零，该系统调用返回最后一个有效可用的地址
   movl $SYS_BRK, %eax
   movl $0, %ebx
   int $LINUX_SYSCALL
@@ -65,7 +65,7 @@ allocate_init:
 ##### allocate ##########
 # 目的： 此函数用于获取一段内存。他查看是否存在自由内存块， 如不存在，则向linux请求
 # 参数： 此函数有一个参数， 就是我们要求到内存块大小
-# 返回值： 此函数将所分配到地址返回到%eax中。如果已无可用内存，就返回0到%eax
+# 返回值： 此函数将所分配的地址返回到%eax中。如果已无可用内存，就返回0到%eax
 
 ##### 处理 #############
 # 用到到变量 ####
@@ -74,9 +74,9 @@ allocate_init:
 # %ebx - 当前中断位置
 # %edx - 当前内存区大小
 
-# 我们检测每个heap_begin开始到内存区，查看每一个到大小以及是否分配
+# 我们检测每个heap_begin开始到内存区，查看每一个的大小以及是否分配
 # 如果某个内存区大于等于所请求的大小，且可用，该函数就获取此内存区
-# 如果无法找到足够大到内存区， 就像linux请求更多的内存，这种情况下，此函数会向前移动current_break
+# 如果无法找到足够大的内存区， 就像linux请求更多的内存，这种情况下，此函数会向前移动current_break
 .globl allocate
 .type allocate, @function
 allocate:
@@ -117,7 +117,7 @@ next_location:
 allocate_here：
   # 将空间标识为不可用
   movl $UNAVAILABLE, HDR_AVAIL_OFFSET(%eax)
-  addl $HEADER_SIZE, %eax  # 将可用内存区到下一个位置移入%eax（因为这是我们要返回到内容）
+  addl $HEADER_SIZE, %eax  # 将可用内存区的下一个位置移入%eax（因为这是我们要返回到内容）
 
   movl %ebp, %esp
   popl %ebp
@@ -126,7 +126,7 @@ allocate_here：
 # 如果函数执行到这里， 说明已经耗尽量所有可寻址内存， 需要请求更多内存。
 # %ebx保存当前数据结束位置，%ecx保存数据大小
 move_break:
-  # 需要增加%ebx到值， 使之为我们想要内存结束的地方
+  # 需要增加%ebx的值， 使之为我们想要内存结束的地方
   # 因此要将其与内存区域头部结构到大小相加， 然后将中断与所请求的数据的大小相加
   # 接着就要向linux要求更多的内存
   addl $HEADER_SIZE, %ebx
