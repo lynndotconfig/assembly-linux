@@ -9,6 +9,7 @@
 #  为了方便调试程序，返回到指针仅仅指向所请求到实际内存位置，
 #  这也让我们无需更改调用程序即可更改结构
 
+.code32
 .section .data
 ###### 局部变量　######
 
@@ -45,7 +46,7 @@ current_break:
 .type allocate_init, @function
 allocate_init:
   pushl %ebp
-  pushl %esp, %ebp
+  movl %esp, %ebp
 
   # 如果发起brk系统调用时， %ebx内容为零，该系统调用返回最后一个有效可用的地址
   movl $SYS_BRK, %eax
@@ -89,7 +90,7 @@ allocate:
   movl current_break, %ebx
 
 # 此处开始循环搜索每个内存区
-allocate_begin:
+alloc_loop_begin:
   cmpl %ebx, %eax  # 如果两者相等，就表明需要更多到内存
   je move_break
 
@@ -97,7 +98,7 @@ allocate_begin:
   movl HDR_SIZE_OFFSET(%eax), %edx
 
   # 如果无可用空间， 则继续搜索下一块内存区
-  cmpl UNAVAILABLE, HDR_AVAIL_OFFSET(%eax)
+  cmpl $UNAVAILABLE, HDR_AVAIL_OFFSET(%eax)
   je next_location
 
   # 如果内存区可用，就将之与所需大小进行比较
@@ -114,7 +115,7 @@ next_location:
   jmp alloc_loop_begin  # 查看下一个位置
 
 # 如果执行此处代码，说明要分配到内存区头在%eax中
-allocate_here：
+allocate_here:
   # 将空间标识为不可用
   movl $UNAVAILABLE, HDR_AVAIL_OFFSET(%eax)
   addl $HEADER_SIZE, %eax  # 将可用内存区的下一个位置移入%eax（因为这是我们要返回到内容）
@@ -181,7 +182,7 @@ error:
 .type deallocate, @function
 # 要释放的内存区域栈位置
 .equ ST_MEMORY_SEG, 4
-deallocate：
+deallocate:
   # 因此此函数很简单， 我们无需使用专门函数获取要释放到内存地址（通常该地址为8(%ebp)），
   # 但是由于我们并未将%ebp入栈或将%esp内容移至%ebp, 此处我们使用4(%esp)
   movl ST_MEMORY_SEG(%ebp), %eax
