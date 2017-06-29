@@ -8,6 +8,7 @@
 #  	%eax将保存当前值
 #	%edi将保存基数（10）
 
+.code32
 .equ ST_VALUE, 8
 .equ ST_BUFFER, 12
 
@@ -19,7 +20,7 @@ integer2string:
   movl %esp, %ebp
 
   # 当前字符计数
-  movl %0, %ecx
+  movl $0, %ecx
 
   # 将值移动到所需位置
   movl ST_VALUE(%esp), %eax
@@ -30,7 +31,7 @@ integer2string:
 conversion_loop:
   # 除法实际在%edx:%eax两个寄存器上进行
   # 因此先清除%edx
-  movl$0, %edx
+  movl $0, %edx
 
   # 将%edx：%eax(这是默认的)除以10
   # 商存储在%eax中， 余数存储在%edx(两者都是默认的)
